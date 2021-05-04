@@ -1,0 +1,29 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+<div class="container mb-3">
+    <h3>Categories/{{ category }}</h3>
+    {% for listing in listings %}
+    {% if listing.available %}
+        <div class="card mb-3" style="max-width: 800px;">
+            <a href="{% url 'listing_view' listing.id %}" class="card-block stretched-link text-decoration-none"></a>
+            <div class="row no-gutters">
+                <div class="col-sm-5" >
+                    <img src="{{ listing.photo }}" class="card-img-top h-100" alt="{{ listing.title }}">
+                </div>
+                <div class="col-sm-7">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ listing.title}}</h5>
+                        <p class="card-text">{{ listing.description}}</p>
+                        <p class="card-text">{{ listing.price}}$</p>
+                    </div>
+                </div>
+            </div>
+        </div> 
+    {% endif %}             
+    {% endfor %}
+
+</div>
+
+{% endblock %}

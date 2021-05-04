@@ -1,0 +1,112 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+<!-- LISTING INFO -->
+<div class="container mb-3">
+
+    <div class="row">
+        <!-- PHOTO -->
+        <div class="col-sm">
+            <img src="{{ listing.photo }}" class="w-100 p-3" alt="{{ listing.title }}">
+        </div>
+        <!-- DESCRPTION -->
+        <div class="col-sm">
+            <h2>{{ listing.title }}</h2>
+            <h3>Price: <b>{{ listing.price }}$</b> </h3>
+            <h6>Description</h6>
+            <p>{{ listing.description }}</p>
+            <h6>Category: {{ listing.category }}</h6>
+            <h6>Seller: {{ listing.seller }}</h6>
+            {% if isAvailable and user == seller %}
+                <a class="btn btn-outline-danger" href="{% url 'close' listing.id %}">Close aution</a>           
+            {% endif %}
+        </div>
+        <!-- BID & NOTIFICATIONS -->
+        <div class="col-sm card">
+            {% if isAvailable %}
+                <form autocomplete="off" action="{% url 'bid' listing.id %}" method="POST">
+                {% csrf_token %}
+
+                    <h4>Price: {{ listing.price }}$ </h4>
+
+                    <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">$</span>
+                    </div>
+                    {% if user.is_authenticated %}
+                        <input type="text" class="form-control" name="price" aria-label="Amount (to the nearest dollar)">
+                    {% else %}
+                        <input type="text" class="form-control" name="price" aria-label="Amount (to the nearest dollar)" disabled>
+                    {% endif %}
+                    <div class="input-group-append">   
+                        <span class="input-group-text">.00</span>
+                    </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    {% if user.is_authenticated %}
+                    <input class="btn btn-primary btn-lg" type="submit" value="Place Bid">
+                    {% else %}
+                    <input class="btn btn-primary btn-lg" type="submit" value="Place Bid" disabled>
+                    {% endif %}
+                    </div><br>
+
+                    <p class="text-danger">{{ message }}</p>
+
+                </form>
+                
+                {% if user.is_authenticated %}
+                    {% if user in inWatchlist %}
+                        <a href="{% url 'removeWatchlist' listing.id %}">- Remove from Watchlist</a>
+                    {% else %}
+                        <a href="{% url 'addWatchlist' listing.id %}">+ Add to Watchlist</a>
+                    {% endif %}
+                {% endif %}
+
+            {% else %}
+                {% if user == buyer %}
+                    <h3 class="text-info">Congratulations on your winning bid</h3>
+                {% endif %}
+                {% if user == seller %}
+                    <h3 class="text-info">Auction closed</h3>
+                    <h4 class="text-info">Your listing was sold to {{buyer}} in {{ listing.price}}$</h4>
+                {% endif %}
+            {% endif %}
+
+        </div>    
+    </div>
+
+</div><br>
+
+<!-- COMMENTS SECTION -->
+<div class="container mb-3">
+    <!-- FORM -->
+    <form autocomplete="off" action="{% url 'comment' listing.id %}" method="POST"> <!-- {% url 'comment' listing.id %} -->
+        {% csrf_token %}
+        <h4>Comments section: </h4>
+        <div class="form-floating col-7 mb-3">
+            <div class="mb-3">
+                {% if user.is_authenticated %}
+                    <textarea class="form-control mb-3" placeholder="Leave a comment here" id="commentTextarea" style="height: 100px" name="text"></textarea>
+                    <input class="btn btn-primary btn-lg" type="submit" value="Send">
+                {% else %}
+                    <textarea class="form-control mb-3" placeholder="Leave a comment here" id="commentTextarea" style="height: 100px" disabled></textarea>
+                    <input class="btn btn-primary btn-lg" type="submit" value="Send" disabled>
+                {% endif %}
+            </div>
+            
+        </div>
+    </form>
+    <!-- COMMENTS LIST -->
+    {% for comment in comments %}
+        <div class="card-body bg-light col-7 mb-3">
+            <h6 class="card-title text-uppercase">{{ comment.user }}</h6>
+            <p class="card-text">{{ comment.text }}</p>
+        </div>
+    {% endfor %}
+</div>
+
+
+
+
+{% endblock %}
